@@ -1,14 +1,14 @@
 const express = require('express')
 const crypto = require('crypto')
-const multer = require('multer')
 const bodyParser = require('body-parser')
+const env = require('.env')
 
-
+// Web server
 const app = express()
 app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({extended: false}))
 const port = process.env.PORT || 5000
 
+// Database connection
 const {Pool} = require('pg')
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -16,6 +16,15 @@ const pool = new Pool({
         rejectUnauthorized: false
     }
 })
+
+function verifySignature({ signingKey, timestamp, token, signature }) {
+    const encodedToken = crypto
+        .createHmac('sha256', signingKey)
+        .update(timestamp.concat(token))
+        .digest('hex')
+
+    return (encodedToken === signature)
+}
 
 app.get('/', (req, res) => {
     console.log(`req:${req}`)
@@ -33,14 +42,37 @@ app.get('/', (req, res) => {
       res.send("Error " + err);
     }
   })
-  .post('/emailfailure', (req, res) => {
-      const body = req.body;
+.post('/emailfailure', (req, res) => {
+    try {
+        
+    const body = req.body
+    const signature = body.signature
+    const events = body.event-data
+    
+    if (!signature || !events) {
+        res.sendStatus(406)
+        return
+    }
+
+    const validSignature = verifySignature(process.env.MAILGUN_WEBHOOK_KEY, signature.timestamp, signature.token, signature.signature)
+
+    (validSignature) ? console.log('valid signature') : () => {
+        console.log(`invalid signature ${process.env.MAILGUN_WEBHOOK_KEY}, ${signature.timestamp}, ${signature.token}, ${signature.signature}`)
+        res.sendStatus(406)
+        return
+    }
+
       console.log(`body: ${JSON.stringify(body)}`)
       console.log(`params: ${JSON.stringify(req.params)}`)
       console.log(`query: ${JSON.stringify(req.query)}`)
       console.log(`headers: ${JSON.stringify(req.headers)}`)
       // console.log(`all: ${JSON.stringify(req)}}`)
       res.sendStatus(200)
+    }
+    catch (err) {
+        console.log(`Error in emailfailure ${err}`)
+        res.sendStatus(500)
+    }
   })
 
 app.listen(port, () => {
