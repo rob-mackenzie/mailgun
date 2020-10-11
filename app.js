@@ -1,5 +1,11 @@
 const express = require('express')
+const crypto = require('crypto')
+const multer = require('multer')
+const bodyParser = require('body-parser')
+
+
 const app = express()
+app.use(bodyParser.urlencoded({extended: false}))
 const port = process.env.PORT || 5000
 
 const {Pool} = require('pg')
@@ -26,9 +32,9 @@ app.get('/', (req, res) => {
       res.send("Error " + err);
     }
   })
-  .post('/emailfailure', (req, res) => {
+  .post('/emailfailure', multer().none(), (req, res) => {
       const body = req.body;
-      console.log(`body: ${body}`)
+      console.log(`body: ${JSON.stringify(body)}`)
       console.log(`params: ${JSON.stringify(req.params)}`)
       console.log(`query: ${JSON.stringify(req.query)}`)
       console.log(`headers: ${JSON.stringify(req.headers)}`)
