@@ -27,7 +27,9 @@ app.get('/', (req, res) => {
     }
   })
   .post('/emailfailure', (req, res) => {
-      console.log(`req: ${req}`)
+      console.log(`body: ${req.body}`)
+      console.log(`params: ${req.params}`)
+      console.log(`query: ${req.query}`)
       res.sendStatus(200)
   })
 
