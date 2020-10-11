@@ -30,7 +30,7 @@ app.get('/', (req, res) => {
       console.log(`body: ${req.body}`)
       console.log(`params: ${req.params}`)
       console.log(`query: ${req.query}`)
-      console.log(`all: ${JSON.stringify(req)}}`)
+      // console.log(`all: ${JSON.stringify(req)}}`)
       res.sendStatus(200)
   })
 
