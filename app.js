@@ -28,9 +28,10 @@ app.get('/', (req, res) => {
   })
   .post('/emailfailure', (req, res) => {
       const body = req.body;
-      console.log(`body: ${body}, length: ${body.length}`)
+      console.log(`body: ${body}`)
       console.log(`params: ${req.params}`)
       console.log(`query: ${req.query}`)
+      console.log(`headers: ${req.headers}`)
       // console.log(`all: ${JSON.stringify(req)}}`)
       res.sendStatus(200)
   })
