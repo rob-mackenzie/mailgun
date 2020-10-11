@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
         
     const body = req.body
     const signature = body.signature
-    const events = body.event-data
+    const events = body['event-data']
     
     if (!signature || !events) {
         res.sendStatus(406)
