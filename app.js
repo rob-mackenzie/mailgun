@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 
 
 const app = express()
+app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({extended: false}))
 const port = process.env.PORT || 5000
 
@@ -32,7 +33,7 @@ app.get('/', (req, res) => {
       res.send("Error " + err);
     }
   })
-  .post('/emailfailure', bodyParser.urlencoded(), (req, res) => {
+  .post('/emailfailure', (req, res) => {
       const body = req.body;
       console.log(`body: ${JSON.stringify(body)}`)
       console.log(`params: ${JSON.stringify(req.params)}`)
