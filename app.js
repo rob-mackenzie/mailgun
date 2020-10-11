@@ -16,7 +16,7 @@ const pool = new Pool({
     }
 })
 
-function verifySignature({ signingKey, timestamp, token, signature }) {
+function verifySignature(signingKey, timestamp, token, signature) {
     const encodedToken = crypto
         .createHmac('sha256', signingKey)
         .update(timestamp.concat(token))
@@ -49,7 +49,7 @@ app.get('/', (req, res) => {
     const events = body['event-data']
     
     if (!signature || !events) {
-        res.sendStatus(406)
+        res.status(406).send('missing signature or events')
         return
     }
 
@@ -57,7 +57,7 @@ app.get('/', (req, res) => {
 
     (validSignature) ? console.log('valid signature') : () => {
         console.log(`invalid signature ${process.env.MAILGUN_WEBHOOK_KEY}, ${signature.timestamp}, ${signature.token}, ${signature.signature}`)
-        res.sendStatus(406)
+        res.status(406).send('invalid signature')
         return
     }
 
