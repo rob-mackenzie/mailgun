@@ -16,8 +16,8 @@ const pool = new Pool({
     }
 })
 
-function verifySignature(signingKey, timestamp, token, signature) {
-    const encodedToken = crypto
+async function verifySignature(signingKey, timestamp, token, signature) {
+    const encodedToken = await crypto
         .createHmac('sha256', signingKey)
         .update(timestamp.concat(token))
         .digest('hex')
@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
       res.send("Error " + err);
     }
   })
-.post('/emailfailure', (req, res) => {
+.post('/emailfailure', async (req, res) => {
     try {
         
     const body = req.body
@@ -53,7 +53,7 @@ app.get('/', (req, res) => {
         return
     }
 
-    const validSignature = verifySignature(process.env.MAILGUN_WEBHOOK_KEY, signature.timestamp, signature.token, signature.signature)
+    const validSignature = await verifySignature(process.env.MAILGUN_WEBHOOK_KEY, signature.timestamp, signature.token, signature.signature)
 
     (validSignature) ? console.log('valid signature') : () => {
         console.log(`invalid signature ${process.env.MAILGUN_WEBHOOK_KEY}, ${signature.timestamp}, ${signature.token}, ${signature.signature}`)
