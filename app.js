@@ -16,15 +16,6 @@ const pool = new Pool({
     }
 })
 
-async function verifySignature(signingKey, timestamp, token, signature) {
-    const encodedToken = await crypto
-        .createHmac('sha256', signingKey)
-        .update(timestamp.concat(token))
-        .digest('hex')
-
-    return (encodedToken === signature)
-}
-
 app.get('/', (req, res) => {
     console.log(`req:${req}`)
     res.send('Hello World!')
@@ -43,30 +34,32 @@ app.get('/', (req, res) => {
   })
 .post('/emailfailure', async (req, res) => {
     try {
+        const body = req.body
+        const signature = body.signature
+        const events = body['event-data']
         
-    const body = req.body
-    const signature = body.signature
-    const events = body['event-data']
-    
-    if (!signature || !events) {
-        res.status(406).send('missing signature or events')
-        return
-    }
+        if (!signature || !events) {
+            res.status(406).send('missing signature or events')
+            return
+        }
 
-    const validSignature = await verifySignature(process.env.MAILGUN_WEBHOOK_KEY, signature.timestamp, signature.token, signature.signature)
+        // Check that the signature is valid
+        const value = signature.timestamp + signature.token
+        const hash = crypto.createHmac('sha256',
+                    process.env.MAILGUN_WEBHOOK_KEY)
+                         .update(value)
+                         .digest('hex');
+        if (hash !== signature.signature) {
+          console.log('Invalid signature');
+          return res.end();
+        }
 
-    (validSignature) ? console.log('valid signature') : () => {
-        console.log(`invalid signature ${process.env.MAILGUN_WEBHOOK_KEY}, ${signature.timestamp}, ${signature.token}, ${signature.signature}`)
-        res.status(406).send('invalid signature')
-        return
-    }
-
-      console.log(`body: ${JSON.stringify(body)}`)
-      console.log(`params: ${JSON.stringify(req.params)}`)
-      console.log(`query: ${JSON.stringify(req.query)}`)
-      console.log(`headers: ${JSON.stringify(req.headers)}`)
-      // console.log(`all: ${JSON.stringify(req)}}`)
-      res.sendStatus(200)
+        console.log(`body: ${JSON.stringify(body)}`)
+        console.log(`params: ${JSON.stringify(req.params)}`)
+        console.log(`query: ${JSON.stringify(req.query)}`)
+        console.log(`headers: ${JSON.stringify(req.headers)}`)
+        // console.log(`all: ${JSON.stringify(req)}}`)
+        res.sendStatus(200)
     }
     catch (err) {
         console.log(`Error in emailfailure ${err}`)
