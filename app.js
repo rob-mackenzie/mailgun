@@ -16,6 +16,13 @@ const pool = new Pool({
     }
 })
 
+function extractEventData(event) {
+    const {timestamp, reason, message, recipient} = event
+    const messageId = message.headers["message-id"]
+    const {code, description} = event["delivery-status"]
+    return {timestamp, reason, code, description, recipient, messageId}
+}
+
 app.get('/', (req, res) => {
     console.log(`req:${req}`)
     res.send('Hello World!')
@@ -23,7 +30,7 @@ app.get('/', (req, res) => {
 .get('/db', async (req, res) => {
     try {
       const client = await pool.connect();
-      const result = await client.query('SELECT * FROM test_table');
+      const result = await client.query('SELECT * FROM email_failures');
       const results = { 'results': (result) ? result.rows : null};
       res.send(results );
       client.release();
@@ -54,10 +61,19 @@ app.get('/', (req, res) => {
           return res.end();
         }
 
-        console.log(`body: ${JSON.stringify(body)}`)
-        console.log(`params: ${JSON.stringify(req.params)}`)
-        console.log(`query: ${JSON.stringify(req.query)}`)
-        console.log(`headers: ${JSON.stringify(req.headers)}`)
+        // extract the relevant data and save it to the database
+        const {timestamp, reason, code, description, recipient, messageId} = extractEventData
+
+        const client = await pool.connect();
+        const result = await client.query(`INSERT email_failures (timestamp, reason, code, description, message_id) VALUES (${timestamp}, ${reason}, ${code}, ${description}, ${messageId})`);
+        const results = { 'results': (result) ? result.rows : null};
+        console.log(results)
+        client.release();
+
+        // console.log(`body: ${JSON.stringify(body)}`)
+        // console.log(`params: ${JSON.stringify(req.params)}`)
+        // console.log(`query: ${JSON.stringify(req.query)}`)
+        // console.log(`headers: ${JSON.stringify(req.headers)}`)
         // console.log(`all: ${JSON.stringify(req)}}`)
         res.sendStatus(200)
     }
