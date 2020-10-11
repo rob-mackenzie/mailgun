@@ -1,0 +1,22 @@
+{
+  "name": "mailgun",
+  "version": "0.0.1",
+  "description": "app to receive delivery notifications from mailgun",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rob-mackenzie/mailgun.git"
+  },
+  "author": "Rob Mackenzie",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rob-mackenzie/mailgun/issues"
+  },
+  "homepage": "https://github.com/rob-mackenzie/mailgun#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
