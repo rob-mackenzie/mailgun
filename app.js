@@ -26,6 +26,10 @@ app.get('/', (req, res) => {
       res.send("Error " + err);
     }
   })
+  .post('/emailfailure', (req, res) => {
+      console.log(`req: ${req}`)
+      res.sendStatus(200)
+  })
 
 app.listen(port, () => {
     console.log(`Example app listening at ${port}`)
