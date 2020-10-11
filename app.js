@@ -1,7 +1,6 @@
 const express = require('express')
 const crypto = require('crypto')
 const bodyParser = require('body-parser')
-const env = require('.env')
 
 // Web server
 const app = express()
